@@ -1,0 +1,158 @@
+env_vars:
+  GOOGLE_SERVER_API_KEY: "{{env(GOOGLE_SERVER_API_KEY)}}"
+input_data_path: input_data
+output_data_path: output_data
+data_loader:
+  input_file_path: "{{input_data_path}}"
+  output_file_path: "{{output_data_path}}"
+  geodataframe_loader:
+    google_server_api_key: "{{env_vars.GOOGLE_SERVER_API_KEY}}"
+    min_delay_between_requests_in_seconds: 0.5
+  excel:
+    intake_form:
+      file_name: 2025 6.1 (Admin Damage Report) LA Wildfires Relief.xlsx
+      sheet_name: Damage
+      label: intake_form
+      preprocessing:
+        - processing_type: dropna
+          data:
+            - "Intake #"
+        - processing_type: select_column
+          data:
+            - "Intake #"
+            - "Full Addr"
+            - "Type of Affected Structure"
+            - "Level of damage"
+            - "Damage according to Clients"
+            - "County"
+            - "Reviewer\nName & Date"
+            - "Remarks"
+      geocode_column_name: Full Addr
+      post_processing:
+        address_formatting:
+          to_upper: true
+          replace:
+            - old_value: ", USA"
+              new_value: ""
+          apply_unidecode: true
+  geojson:
+    postfire_master_data:
+      file_name: POSTFIRE_MASTER_DATA_SHARE_140463065990229786.geojson
+      label: postfire_master_data
+    fire_perimeters:
+      file_name: WFIGS_Interagency_Perimeters_YearToDate_7244446855919551728.geojson
+      label: fire_perimeters
+      columns:
+        - poly_IncidentName
+        - geometry
+
+matcher:
+  by_fire_perimeters:
+    label: fire_perimeters_result
+    unmatched_label: "{{matcher.by_fire_perimeters.label}}_unmatched"
+    matcher_type: by_fire_perimeters
+    source_data: "{{data_loader.excel.intake_form.label}}"
+    match_against_data: "{{data_loader.geojson.fire_perimeters.label}}"
+    matcher_data_key_list:
+      incident_name:
+        - Eaton
+        - PALISADES
+    matcher_data_key_value:
+      max_distance_from_perimeter_meter: "1500"
+      incident_column_name: poly_IncidentName
+    save_file:
+      file_name: "{{matcher.by_fire_perimeters.label}}.xlsx"
+      sheet_name: "{{data_loader.excel.intake_form.sheet_name}}"
+      include_index: false
+  by_address:
+    label: address_matching_result
+    unmatched_label: "{{matcher.by_address.label}}_unmatched"
+    matcher_type: by_address
+    source_data: "{{matcher.by_fire_perimeters.label}}"
+    match_against_data: "{{data_loader.geojson.postfire_master_data.label}}"
+    matcher_data_key_value:
+      on_column_name: SITEADDRESS
+    column_suffix:
+      left: None
+      right: "_address_matching"
+    save_file:
+      file_name: "{{matcher.by_address.label}}.xlsx"
+      sheet_name: "{{data_loader.excel.intake_form.sheet_name}}"
+      include_index: false
+  address_matching_alternative_view:
+    label: address_matching_alternative_view
+    unmatched_label: "{{matcher.address_matching_alternative_view.label}}_unmatched"
+    matcher_type: no_op
+    source_data: "{{matcher.by_address.label}}"
+    match_against_data: "{{matcher.by_address.label}}"
+    save_file:
+      file_name: "{{matcher.address_matching_alternative_view.label}}.xlsx"
+      sheet_name: "{{data_loader.excel.intake_form.sheet_name}}"
+      include_index: false
+      columns:
+        - "Intake #"
+        - "OBJECTID"
+        - "Full Addr"
+        - "SITEADDRESS"
+        - "STREETSUFFIX"
+        - "Distance from Fire Perimeter"
+        - "Type of Affected Structure"
+        - "STRUCTURETYPE"
+        - "Level of damage"
+        - "DAMAGE"
+        - "Damage according to Clients"
+        - "Reviewer\nName & Date"
+        - "Remarks"
+        - "APN"
+        - "INCIDENTNAME"
+        - "INCIDENTNUM"
+        - "INCIDENTSTARTDATE"
+        - "_geocode"
+  by_coordinate_from_address_matching_leftover:
+    label: coordinate_matching_on_address_matching_leftover_result
+    unmatched_label: "{{matcher.by_coordinate_from_address_matching_leftover.label}}_unmatched"
+    source_data: "{{matcher.by_address.unmatched_label}}"
+    match_against_data: "{{data_loader.geojson.postfire_master_data.label}}"
+    matcher_type: by_coordinate
+    matcher_data_key_value:
+      max_match_distance_meter: "20"
+      distance_column_name: distance
+      key_column_name: "Intake #"
+    column_suffix:
+      left: ""
+      right: "_coordinate_matching"
+    save_file:
+      file_name: "{{matcher.by_coordinate_from_address_matching_leftover.label}}.xlsx"
+      sheet_name: "{{data_loader.excel.intake_form.sheet_name}}"
+      include_index: false
+  coordinate_matching_alternative_view:
+    label: coordinate_matching_alternative_view
+    unmatched_label: "{{matcher.coordinate_matching_alternative_view.label}}_unmatched"
+    matcher_type: no_op
+    source_data: "{{matcher.by_coordinate_from_address_matching_leftover.label}}"
+    match_against_data: "{{matcher.by_coordinate_from_address_matching_leftover.label}}"
+    save_file:
+      file_name: "{{matcher.coordinate_matching_alternative_view.label}}.xlsx"
+      sheet_name: "{{data_loader.excel.intake_form.sheet_name}}"
+      include_index: false
+      columns:
+        - "Intake #"
+        - "OBJECTID"
+        - "Full Addr"
+        - "SITEADDRESS_"
+        - "SITEADDRESS__coordinate_matching"
+        - "distance"
+        - "STREETSUFFIX"
+        - "Distance from Fire Perimeter"
+        - "Type of Affected Structure"
+        - "STRUCTURETYPE"
+        - "Level of damage"
+        - "DAMAGE"
+        - "Damage according to Clients"
+        - "Reviewer\nName & Date"
+        - "Remarks"
+        - "APN"
+        - "INCIDENTNAME"
+        - "INCIDENTNUM"
+        - "INCIDENTSTARTDATE"
+        - "_geocode"

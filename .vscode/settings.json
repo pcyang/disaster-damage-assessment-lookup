@@ -1,0 +1,54 @@
+{
+    "editor.formatOnPaste": true,
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.fixAll": "explicit",
+            "source.organizeImports": "explicit"
+        },
+    },
+    "files.exclude": {
+        "**/__pycache__": true
+    },
+    "cSpell.words": [
+        "Anson",
+        "charliermarsh",
+        "chrisdias",
+        "contextily",
+        "dataclass",
+        "devcontainers",
+        "dotenv",
+        "dropna",
+        "eamodio",
+        "EPSG",
+        "geocoders",
+        "geodataframe",
+        "geolocator",
+        "geopandas",
+        "Geopy",
+        "himl",
+        "INCIDENTNAME",
+        "INCIDENTNUM",
+        "INCIDENTSTARTDATE",
+        "isin",
+        "isna",
+        "lsuffix",
+        "matplotlib",
+        "opennewinstance",
+        "POSTFIRE",
+        "pylint",
+        "representer",
+        "rsuffix",
+        "SITEADDRESS",
+        "sjoin",
+        "STREETSUFFIX",
+        "STRUCTURETYPE",
+        "unidecode",
+        "WFIGS",
+        "zaaack"
+    ],
+    "pylint.args": [
+        "--disable=logging-fstring-interpolation",
+    ],
+}

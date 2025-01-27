@@ -1,0 +1,7 @@
+geopandas
+geopy
+unidecode
+python-dotenv
+himl>=0.15.0,<0.16.0
+marshmallow-dataclass
+openpyxl
