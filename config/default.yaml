@@ -1,5 +1,9 @@
 env_vars:
   GOOGLE_SERVER_API_KEY: "{{env(GOOGLE_SERVER_API_KEY)}}"
+constants:
+  google_request_min_delay_between_request_in_seconds: "0.5"
+  max_distance_from_fire_perimeter_meter: "1500"
+  coordinate_matching_max_match_distance_meter: "20"
 input_data_path: input_data
 output_data_path: output_data
 data_loader:
@@ -7,7 +11,7 @@ data_loader:
   output_file_path: "{{output_data_path}}"
   geodataframe_loader:
     google_server_api_key: "{{env_vars.GOOGLE_SERVER_API_KEY}}"
-    min_delay_between_requests_in_seconds: 0.5
+    min_delay_between_requests_in_seconds: "{{constants.google_request_min_delay_between_request_in_seconds}}"
   excel:
     intake_form:
       file_name: 2025 6.1 (Admin Damage Report) LA Wildfires Relief.xlsx
@@ -58,7 +62,7 @@ matcher:
         - Eaton
         - PALISADES
     matcher_data_key_value:
-      max_distance_from_perimeter_meter: "1500"
+      max_distance_from_perimeter_meter: "{{constants.max_distance_from_fire_perimeter_meter}}"
       incident_column_name: poly_IncidentName
     save_file:
       file_name: "{{matcher.by_fire_perimeters.label}}.xlsx"
@@ -115,7 +119,7 @@ matcher:
     match_against_data: "{{data_loader.geojson.postfire_master_data.label}}"
     matcher_type: by_coordinate
     matcher_data_key_value:
-      max_match_distance_meter: "20"
+      max_match_distance_meter: "{{constants.coordinate_matching_max_match_distance_meter}}"
       distance_column_name: distance
       key_column_name: "Intake #"
     column_suffix:
