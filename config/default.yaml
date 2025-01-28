@@ -156,3 +156,13 @@ matcher:
         - "INCIDENTNUM"
         - "INCIDENTSTARTDATE"
         - "_geocode"
+  unmatched:
+    label: unmatched
+    unmatched_label: "{{matcher.unmatched.label}}_unmatched"
+    matcher_type: no_op
+    source_data: "{{matcher.by_coordinate_from_address_matching_leftover.unmatched_label}}"
+    match_against_data: ""
+    save_file:
+      file_name: "{{matcher.unmatched.label}}.xlsx"
+      sheet_name: "{{data_loader.excel.intake_form.sheet_name}}"
+      include_index: false
