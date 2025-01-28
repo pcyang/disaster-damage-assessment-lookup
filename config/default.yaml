@@ -17,6 +17,7 @@ data_loader:
       file_name: 2025 6.1 (Admin Damage Report) LA Wildfires Relief.xlsx
       sheet_name: Damage
       label: intake_form
+      load_new_data: true
       preprocessing:
         - processing_type: dropna
           data:

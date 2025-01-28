@@ -128,12 +128,14 @@ class ExcelGeoDataFrameLoader:
             df: DataFrame to add geolocation information to.
             geocode_search_column_name: columns to run geocode search on.
         """
+        logger.info("Adding geolocation data, this can take a while...")
         df[GEOCODE_COLUMN_NAME] = df.apply(
             label_location,
             geocode=self.geocode,
             address_column_name=geocode_search_column_name,
             axis=1,
         )
+        logger.info("Finished adding geolocation data")
 
     def do_preprocessing(
         self, df: DataFrame, preprocessing_steps_config: List[PreProcessingStepConfig]
@@ -211,6 +213,22 @@ class ExcelGeoDataFrameLoader:
 
             excel_file = pd.ExcelFile(cache_file_path)
             df = pd.read_excel(excel_file, config.sheet_name)
+
+            if config.load_new_data:
+                print(f"Merging additional data from {excel_file_to_load}")
+                source_intake_form_excel = pd.ExcelFile(excel_file_to_load)
+                source_intake_form_dataframe = pd.read_excel(
+                    source_intake_form_excel, config.sheet_name
+                )
+
+                source_intake_form_dataframe = self.do_preprocessing(
+                    source_intake_form_dataframe, config.preprocessing
+                )
+
+                df = df.combine_first(source_intake_form_dataframe)
+
+                self.add_geolocation_data(df, config.geocode_column_name)
+                self.do_post_processing(df, config.post_processing)
         else:
             logger.debug(f"Loaded excel file '{excel_file_to_load}'")
             excel_file = pd.ExcelFile(excel_file_to_load)

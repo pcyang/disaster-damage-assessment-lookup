@@ -74,6 +74,9 @@ class ExcelGeoDataFrameConfig:
     """Name of the column in the Excel spreadsheet to use for the geocode lookup for coordinate 
     and normalized address, e.g. the raw input address column."""
 
+    load_new_data: Optional[bool] = False
+    """Whether or not new entry from the excel sheet should be loaded."""
+
     preprocessing: Optional[List[PreProcessingStepConfig]] = field(default_factory=list)
     """Preprocessing operations to run before running the geocoding operation.
     List of Dictionaries with key for the type of operation to run and value 
