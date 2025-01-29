@@ -21,6 +21,9 @@ class StringReplacementConfig:
 class AddressFormattingConfig:
     """Configuration for address formatting."""
 
+    normalized_address_output_column_name: str
+    """Name of the column to create for outputting the normalized address from geocode request."""
+
     to_upper: bool = False
     """Whether or not the address should be converted to upper case. Default to False"""
 

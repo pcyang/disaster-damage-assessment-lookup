@@ -35,6 +35,7 @@ data_loader:
       geocode_column_name: Full Addr
       post_processing:
         address_formatting:
+          normalized_address_output_column_name: SITEADDRESS
           to_upper: true
           replace:
             - old_value: ", USA"

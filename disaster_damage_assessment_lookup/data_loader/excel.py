@@ -33,9 +33,6 @@ GEOCODE_COLUMN_NAME = "_geocode"
 LATITUDE_COLUMN_NAME = "_latitude"
 LONGITUDE_COLUMN_NAME = "_longitude"
 
-# Normalized address to match against the DINS database
-SITEADDRESS_COLUMN_NAME = "SITEADDRESS"
-
 
 def get_cache_name(file_label: str):
     """Returns the name of the file for the given file_label."""
@@ -85,7 +82,7 @@ def label_siteaddress(row, config: AddressFormattingConfig):
     loaded from geocoding API request made to GoogleV3 API.
     """
     if not pd.isnull(row[GEOCODE_COLUMN_NAME]) and pd.isnull(
-        row[SITEADDRESS_COLUMN_NAME]
+        row[config.normalized_address_output_column_name]
     ):
         # GoogleV3's address look like
         # VÍA DE LA PAZ, PACIFIC PALISADES, CA 90272, USA
@@ -107,7 +104,7 @@ def label_siteaddress(row, config: AddressFormattingConfig):
             site_address = unidecode(site_address)
 
         return site_address
-    return row[SITEADDRESS_COLUMN_NAME]
+    return row[config.normalized_address_output_column_name]
 
 
 class ExcelGeoDataFrameLoader:
@@ -173,7 +170,9 @@ class ExcelGeoDataFrameLoader:
         and adding Latitude and Longitude so it can be converted to GeoDataFrame."""
         df[LATITUDE_COLUMN_NAME] = df.apply(label_latitude, axis=1)
         df[LONGITUDE_COLUMN_NAME] = df.apply(label_longitude, axis=1)
-        df[SITEADDRESS_COLUMN_NAME] = df.apply(
+        df[
+            post_processing_config.address_formatting.normalized_address_output_column_name
+        ] = df.apply(
             label_siteaddress, config=post_processing_config.address_formatting, axis=1
         )
 
@@ -239,7 +238,9 @@ class ExcelGeoDataFrameLoader:
             df[GEOCODE_COLUMN_NAME] = numpy.nan
             df[LATITUDE_COLUMN_NAME] = numpy.nan
             df[LONGITUDE_COLUMN_NAME] = numpy.nan
-            df[SITEADDRESS_COLUMN_NAME] = numpy.nan
+            df[
+                config.post_processing.address_formatting.normalized_address_output_column_name
+            ] = numpy.nan
 
             self.add_geolocation_data(df, config.geocode_column_name)
             self.do_post_processing(df, config.post_processing)
