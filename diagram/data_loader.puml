@@ -1,0 +1,68 @@
+@startuml
+title example config/default.yaml data_loader flow
+
+skinparam componentStyle rectangle
+skinparam linetype polyline
+skinparam linetype ortho
+
+[Intake Form.xlsx] as intake_xlsx
+[Fire Damage Assessment.geojson] as master_data_geojson
+[Fire Perimeters.geojson] as fire_perimeters_geojson
+
+[geopy]
+[Google\nGeolocation API] as GoogleV3
+
+intake_xlsx -[hidden]left- master_data_geojson
+master_data_geojson-[hidden]left- fire_perimeters_geojson
+
+
+package "data_loader" {
+    package "excel" {
+        [preprocessing] as excel_pre
+        [add_geolocation_data] as excel_geo
+        [post_processing] as excel_post
+    }
+    [geojson]
+}
+excel_post -[hidden]left- geojson
+
+folder "GeoDataFrame Dictionary" {
+    [intake_form]
+    [postfire_master_data]
+    [fire_perimeters]
+}
+intake_form-[hidden]left- postfire_master_data
+postfire_master_data-[hidden]left- fire_perimeters
+
+intake_xlsx -down-> excel_pre: 1.
+note right of excel_pre
+Drop empty row,
+select subset of
+columns.
+end note
+excel_pre -down-> excel_geo: 2.
+excel_geo <-> geopy: 3. Full Addr
+geopy <-> GoogleV3: 4.
+note right of GoogleV3
+convert
+1 World Way Los Angeles CA 90045
+to
+1 World Way, Los Angeles, CA 90045, USA
+and
+POINT(-118.40342377881207 33.9426032735584)
+end note
+excel_geo -down-> excel_post: 5.
+note right of excel_post
+convert
+1 World Way, Los Angeles, CA 90045, USA
+to
+1 WORLD WAY, LOS ANGELES, CA 90045
+end note
+excel_post -down-> intake_form: 6.
+
+master_data_geojson -down-> geojson: 7.
+geojson -down-> postfire_master_data: 8.
+
+fire_perimeters_geojson -down-> geojson: 9.
+geojson -down-> fire_perimeters: 10.
+@enduml

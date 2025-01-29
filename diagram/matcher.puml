@@ -1,0 +1,73 @@
+@startuml
+title example config/default.yaml matcher flow
+split
+-[hidden]->
+split
+  -[hidden]->
+  :GeoDataFrame\nintake_form; <<input>>
+  note left
+  source_data
+  end note
+split again
+  -[hidden]->
+  :GeoDataFrame\nfire_perimeters; <<input>>
+  note right
+  match_against
+  end note
+end split
+
+:Matcher\nby_fire_perimeters; <<procedure>>
+split
+:GeoDataFrame\nfire_perimeters_result; <<output>>
+note left
+source_data
+end note
+split again
+#green:Excel\nfire_perimeters_result.xlsx; <<output>>
+end
+end split
+
+split again
+  -[hidden]->
+  :GeoDataFrame\npostfire_master_data; <<input>>
+  note right
+  match_against
+  end note
+end split
+
+:Matcher\nby_address; <<procedure>>
+split
+  :GeoDataFrame\naddress_matching_result; <<output>>
+  :Matcher\nno_op; <<procedure>>
+  #green:Excel\naddress_matching_alternative_view.xlsx; <<output>>
+  stop
+split again
+  #green:Excel\naddress_matching_result.xlsx; <<output>>
+  stop
+split again
+  :GeoDataFrame\naddress_matching_result_unmatched; <<output>>
+  note left
+  source_data
+  end note
+  split again
+    -[hidden]->
+    :GeoDataFrame\npostfire_master_data; <<input>>
+    note right
+    match_against
+    end note
+  end split
+  :Matcher\nby_coordinate; <<procedure>>
+  split
+    :GeoDataFrame\ncoordinate_matching_on_address_matching_leftover_result; <<output>>
+    :Matcher\nno_op; <<procedure>>
+    #green:Excel\ncoordinate_matching_alternative_view.xlsx; <<output>>
+    stop
+  split again
+    #green:Excel\ncoordinate_matching_on_address_matching_leftover_result.xlsx; <<output>>
+    stop
+  split again
+    :GeoDataFrame\ncoordinate_matching_on_address_matching_leftover_result_unmatched; <<output>>
+    :Matcher\nno_op; <<procedure>>
+    #green:Excel\numnatched.xlsx; <<output>>
+    stop
+@enduml
