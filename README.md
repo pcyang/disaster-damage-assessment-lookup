@@ -54,7 +54,7 @@ python -m disaster_damage_assessment_lookup.main
 
 ### Configuring the program
 
-The configuration file uses [adobe/him](https://github.com/adobe/himl). See their documentation for more detailed explanations on value interpolation.
+The configuration file uses [adobe/himl](https://github.com/adobe/himl). See their documentation for more detailed explanations on value interpolation.
 
 `config/default.yaml` is an example configuration of the real world use case we have. This file could be use as a starting point and modified to meet the specific need.
 
